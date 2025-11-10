@@ -2,6 +2,9 @@
 
 PETRA (Post-Exploitation Threat Recognition & Analysis) is a command-line interface (CLI) tool designed for cybersecurity analysis of system logs. It focuses on detecting anomalies, insider threats, and potential attacks such as brute-force attempts or ransomware patterns. Built from scratch in Python, it combines basic pattern recognition with simple machine learning models to provide proactive insights for small to medium-sized enterprises (SMEs) and individual administrators.
 
+![PETRA Scan Example](docs/imgs/sc1.png)
+![PETRA Scan Example](docs/imgs/sc2.png)
+
 ## What It Solves
 
 In 2025, cybersecurity tools for log analysis are often enterprise-grade, expensive, or overly complex, leaving SMEs and home administrators with limited options for early threat detection. PETRA addresses this gap by offering a lightweight, open-source alternative that:
