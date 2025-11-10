@@ -1,0 +1,90 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pyw
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# pip and packaging
+pip-log.txt
+pip-delete-this-directory.txt
+pip-wheel-metadata/
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytest_cache/
+.pyre/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build and distribution
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Project-specific
+reports/
+*.html
+*.json
+*.csv
+*.log
+*.mmdb  # GeoIP databases (large binary, download manually)
+~/.petra/  # User config directory
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing and examples (if large)
+examples/large_*.log
+tests/__pycache__/
+tests/.pytest_cache/
+
+# Secrets and configs (never commit real ones)
+configs/user.yaml
+configs/secrets.yaml
+.env
+.env.local
+
+# Optional: Jupyter notebooks checkpoints
+.ipynb_checkpoints

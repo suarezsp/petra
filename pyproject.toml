@@ -1,0 +1,22 @@
+# pyproject.toml → REEMPLAZA TODO EL ARCHIVO
+[project]
+name = "petra"
+version = "1.0.0-beta"
+description = "Post-Exploitation Threat Recognition & Analysis"
+requires-python = ">=3.10"
+dependencies = [
+    "click",
+    "psutil",
+    "tabulate",
+    "pyyaml",
+    "watchdog",
+    "scikit-learn",
+    "pydantic"
+]
+
+[project.scripts]
+petra = "petra_ifaces.cli.commands:cli"   # ← AQUÍ ESTABA EL GUION
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
