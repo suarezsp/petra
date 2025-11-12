@@ -1,0 +1,11 @@
+# FIRST TASK - creating a logic core for the app
+
+I created LogEntry and Anomaly with pydantic. 
+These are the basic domain models. Im using pydantic to validate
+types automatically (p.e avoiding bugs like timestamp="string")
+
+I made them inmutables, so I cant accidentally change them later 
+
+I created a iface with AnomalyLevels 
+
+# SECOND TASK - basic parser
