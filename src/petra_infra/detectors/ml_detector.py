@@ -29,7 +29,7 @@ class MLDetector:
 
         # finds outliers e.g <10%
         cluster_sizes = np.bincount(labels)
-        outlier_labels = np.where(cluster_sizes < len(entries) * 0.1)[0]
+        outlier_labels = np.where(cluster_sizes < len(entries) * 0.15)[0]
 
         anomalies = []
         for label in outlier_labels:
