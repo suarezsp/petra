@@ -3,6 +3,11 @@ import platform
 import psutil 
 import subprocess 
 from datetime import datetime
+#for scanning
+from tabulate import tabulate
+from pathlib import Path
+from petra_model.application.scan_service import ScanService
+from petra_domain.entities.anomaly import Anomaly, AnomalyLevel
 
 @click.group()
 def cli():
@@ -68,3 +73,46 @@ def status():
 
 if __name__ == "__main__":
     cli()
+
+
+## scanning
+@cli.command()
+@click.option('-f', '--file', type=str, required=True, help="Path to log file")
+@click.option('--ml-mode', is_flag=True, help="Enable ML detection (future)")
+def scan(file: str, ml_mode: bool):
+    """Scan log file for anomalies."""
+    try:
+        file_path = Path(file)
+        if not file_path.exists():
+            raise FileNotFoundError(f"Log file not found: {file}")
+        service = ScanService()
+        anomalies = service.scan(Path(file))
+        if not anomalies:
+            click.echo("\033[32m✔ No anomalies detected.\033[0m")
+            return
+
+        # print table
+        table_data = [
+            [
+                anomaly.level.value.upper(),
+                f"{anomaly.score:.2f}",
+                anomaly.type,
+                anomaly.evidence[0].ip if anomaly.evidence else "N/A",
+                anomaly.description
+            ] for anomaly in anomalies
+        ]
+
+        headers = ["Level", "Score", "Type", "IP", "Description"]
+        table = tabulate(table_data, headers, tablefmt="fancy_grid")
+
+        click.echo("\033[31m╔════════════════════════════════════════════╗\033[0m")
+        click.echo("\033[31m║         ANOMALIES DETECTED!                ║\033[0m")
+        click.echo("\033[31m╚════════════════════════════════════════════╝\033[0m")
+        click.echo(table)
+
+        if any(a.level == AnomalyLevel.CRITICAL for a in anomalies):
+            click.echo("\a")  # beep for critical
+
+    except Exception as e:
+        click.echo(f"\033[31mError: {e}\033[0m", err=True)
+        raise
