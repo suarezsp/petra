@@ -11,7 +11,7 @@ from petra_domain.entities.anomaly import Anomaly
 class ScanService:
     """service to scan logs and detect anomalies"""
 
-    def __init__(self, config_path: Path = Path("configs/default.yaml")):
+    def __init__(self, config_path: Path = Path("config/default.yaml")):
         """configs for thresholds"""
         self.config = self._load_config(config_path)
         self.parser = AuthLogParser()

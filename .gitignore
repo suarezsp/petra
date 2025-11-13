@@ -81,8 +81,8 @@ tests/__pycache__/
 tests/.pytest_cache/
 
 # Secrets and configs (never commit real ones)
-configs/user.yaml
-configs/secrets.yaml
+config/user.yaml
+config/secrets.yaml
 .env
 .env.local
 
