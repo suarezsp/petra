@@ -4,9 +4,8 @@ import yaml
 from collections import defaultdict
 
 from petra_infra.parsers.auth_log_parser import AuthLogParser
-from petra_domain.entities.log_entry import LogEntry
 from petra_domain.entities.anomaly import Anomaly, AnomalyLevel
-from petra_domain.entities.anomaly import Anomaly
+from petra_infra.detectors.ml_detector import MLDetector
 
 class ScanService:
     """service to scan logs and detect anomalies"""
@@ -23,7 +22,7 @@ class ScanService:
         with config_path.open("r") as f:
             return yaml.safe_load(f)
         
-    def scan(self, file_path: Path) -> List[Anomaly]:
+    def scan(self, file_path: Path, ml_mode: bool = False) -> List[Anomaly]:
         """scans log file and returns anomalías."""
         entries = list(self.parser.parse_file(file_path))
         anomalies = []
@@ -49,5 +48,9 @@ class ScanService:
                         description=f"{count} login fails from IP {ip}. Ref: NIST SP 800-63B"
                     )
                 )
+
+        if ml_mode:
+            detector = MLDetector(contamination=self.config.get("ml", {}).get("contamination", 0.05))
+            anomalies += detector.detect_outliers(entries)
 
         return anomalies

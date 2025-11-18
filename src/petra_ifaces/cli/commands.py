@@ -86,7 +86,7 @@ def scan(file: str, ml_mode: bool):
         if not file_path.exists():
             raise FileNotFoundError(f"Log file not found: {file}")
         service = ScanService()
-        anomalies = service.scan(Path(file))
+        anomalies = service.scan(file_path, ml_mode=ml_mode)
         if not anomalies:
             click.echo("\033[32m✔ No anomalies detected.\033[0m")
             return

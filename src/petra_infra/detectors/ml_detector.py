@@ -1,49 +1,57 @@
 from typing import List
-from sklearn.cluster import KMeans
+from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from collections import defaultdict
 from petra_domain.entities.log_entry import LogEntry
 from petra_domain.entities.anomaly import Anomaly, AnomalyLevel
 
 class MLDetector:
-    """basic ml"""
+    """Improved ML for timing & fail anomalies."""
 
-    def __init__(self, clusters: int = 3):
-        self.clusters = clusters
+    def __init__(self, contamination: float = 0.05):
+        self.contamination = contamination  # Lower for sensitivity
 
     def detect_outliers(self, entries: List[LogEntry]) -> List[Anomaly]:
-        """kmeans for clusters"""
-        if len(entries) < self.clusters:
-            return []  # too few data
+        if len(entries) < 10:
+            return []
 
-        # takes timestamps as seconds from epoch
-        timestamps = np.array([entry.timestamp.timestamp() for entry in entries]).reshape(-1, 1)
+        # Feature engineering: [hour, fail_rate per IP]
+        features = []
+        fail_rates = defaultdict(int)
+        for entry in entries:
+            hour = entry.timestamp.hour + entry.timestamp.minute / 60.0
+            fail = 1 if not entry.success and "failed" in entry.details.lower() else 0  # Simple fail check
+            if entry.ip:
+                fail_rates[entry.ip] += fail
+            features.append([hour, fail_rates[entry.ip or "unknown"] / max(1, len(entries))])  # Normalized fail rate
 
-        # normalizes
+        X = np.array(features)
+
+        # Normalize
         scaler = StandardScaler()
-        scaled_ts = scaler.fit_transform(timestamps)
+        X_scaled = scaler.fit_transform(X)
 
-        # creates cluster
-        kmeans = KMeans(n_clusters=self.clusters, random_state=42, n_init=10)
-        labels = kmeans.fit_predict(scaled_ts)
+        # IsolationForest
+        model = IsolationForest(contamination=self.contamination, random_state=42)
+        labels = model.fit_predict(X_scaled)  # -1 = outlier
+        scores = -model.decision_function(X_scaled)  # Positive, higher = anomalous
 
-        # finds outliers e.g <10%
-        cluster_sizes = np.bincount(labels)
-        outlier_labels = np.where(cluster_sizes < len(entries) * 0.15)[0]
-
+        # Collect anomalies
         anomalies = []
-        for label in outlier_labels:
-            outlier_indices = np.where(labels == label)[0]
+        outlier_indices = np.where(labels == -1)[0]
+        if len(outlier_indices) > 0:
             evidence = [entries[i] for i in outlier_indices]
-            if evidence:
-                anomalies.append(
-                    Anomaly(
-                        level=AnomalyLevel.MEDIUM,
-                        score=0.7,  # heuristic
-                        type="unusual_timing",
-                        evidence=evidence,
-                        description=f"Outlier cluster of {len(evidence)} entries at unusual times. Ref: NIST SP 800-61"
-                    )
+            avg_score = np.mean(scores[outlier_indices])
+            level = AnomalyLevel.MEDIUM if avg_score < 0.5 else AnomalyLevel.HIGH
+            anomalies.append(
+                Anomaly(
+                    level=level,
+                    score=avg_score,
+                    type="unusual_timing",
+                    evidence=evidence,
+                    description=f"Detected {len(evidence)} outliers in timing/fail patterns. Ref: NIST SP 800-61"
                 )
+            )
 
         return anomalies
